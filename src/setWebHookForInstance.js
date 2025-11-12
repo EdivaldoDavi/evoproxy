@@ -10,34 +10,52 @@ export async function setWebhookForInstance(instanceId) {
   try {
     const url = `${EVO_URL.replace(/\/$/, "")}/webhook/set/${encodeURIComponent(instanceId)}`;
 
+    const body = {
+  webhook: {
+    "enabled": true,
+    url: WEBHOOK_URL,
+    webhook_by_events: false,
+    webhook_base64: true,
+    events: [
+      "APPLICATION_STARTUP",
+      "MESSAGES_UPSERT",
+      "MESSAGES_UPDATE",
+      "CONNECTION_UPDATE",
+      "QRCODE_UPDATED"
+    ]
+  }
+};
+
+
+    console.log("➡️ Enviando para EvolutionAPI:", url);
+    console.log("📦 Body:", JSON.stringify(body, null, 2));
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: EVO_TOKEN,
+        apikey: EVO_TOKEN
       },
-      body: JSON.stringify({
-        url: WEBHOOK_URL, // 🔹 vem do .env
-        webhook_by_events: true,
-        webhook_base64: true,
-        events: [
-          "APPLICATION_STARTUP",
-          "MESSAGES_UPSERT",
-          "MESSAGES_UPDATE",
-          "CONNECTION_UPDATE",
-          "QR_CODE_UPDATED",
-        ],
-      }),
+      body: JSON.stringify(body)
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      console.error("❌ Falha ao configurar webhook:", data);
-      throw new Error(data?.error || "Falha ao configurar webhook");
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { raw: text };
     }
 
-    console.log(`✅ Webhook configurado para instância ${instanceId}`);
+    if (!res.ok) {
+      console.error("❌ Falha ao configurar webhook (detalhes brutos):", data);
+      if (data?.response?.message) {
+        console.error("📛 Mensagem detalhada EvolutionAPI:", data.response.message);
+      }
+      throw new Error(data?.error || `Falha ao configurar webhook (HTTP ${res.status})`);
+    }
+
+    console.log(`✅ Webhook configurado com sucesso para instância ${instanceId}`);
     return data;
   } catch (err) {
     console.error("🚨 Erro ao configurar webhook:", err.message);

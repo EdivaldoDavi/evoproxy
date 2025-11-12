@@ -1,12 +1,14 @@
 import { Router } from "express";
 import fetch from "node-fetch";
+import { setWebhookForInstance } from "./setWebhookForInstance.js"; // ajuste o caminho conforme sua estrutura
+import { setInstanceSettings } from "./setInstanceSettings.js";
 
 const router = Router();
 
 const EVO_URL = process.env.EVO_URL;
 const EVO_TOKEN = process.env.EVO_TOKEN;
 const WEBHOOK_PUBLIC_URL = process.env.WEBHOOK_PUBLIC_URL;
-
+const WEBHOOK_URL = process.env.WEBHOOK_URL; // 👈 ADICIONE ESTA LINHA
 // ✅ Memórias locais (RAM)
 const qrMemory = {};
 const statusMemory = {};
@@ -112,6 +114,13 @@ router.post("/start", async (req, res) => {
 
     if (Array.isArray(list) && list.length > 0) {
       console.log("✅ Instância já existe, usando ela");
+
+       try {
+        await setWebhookForInstance(instanceName);
+        await setInstanceSettings(instanceName);
+      } catch (err) {
+        console.warn("⚠️ Falha ao configurar webhook existente:", err.message);
+      }
       return res.json({
         usedInstanceName: instanceName,
         instanceName,
@@ -120,33 +129,57 @@ router.post("/start", async (req, res) => {
     }
 
     // ✅ 2. Se não existir → cria
-    console.log("➕ Criando nova instância:", instanceName);
+console.log("➕ Criando nova instância:", instanceName);
 
-    const body = {
-      instanceName,
-      token: "",
-      integration: "WHATSAPP-BAILEYS",
-      qrcode: true,
-      pairing: false,
-      webhookUrl: WEBHOOK_PUBLIC_URL,
-      webhook_by_events: true,
-      events: ["QRCODE_UPDATED", "APPLICATION_STARTUP"],
-    };
+const body = {
+  instanceName,
+  integration: "WHATSAPP-BAILEYS",
+  qrcode: true,
+  pairing: false,
+  webhookUrl: WEBHOOK_URL, // já envia o webhook fixo
+  webhook_by_events: true,
+  webhook_base64: true,
+  events: [
+    "APPLICATION_STARTUP",
+    "MESSAGES_UPSERT",
+    "MESSAGES_UPDATE",
+    "CONNECTION_UPDATE",
+    "QR_CODE_UPDATED",
+  ],
+};
 
-    const resp = await fetch(`${EVO_URL}/instance/create`, {
-      method: "POST",
-      headers: evoHeaders(),
-      body: JSON.stringify(body),
-    });
+const resp = await fetch(`${EVO_URL.replace(/\/$/, "")}/instance/create`, {
+  method: "POST",
+  headers: evoHeaders(),
+  body: JSON.stringify(body),
+});
 
-    const data = await resp.json();
+const data = await resp.json();
 
-    return res.status(resp.status).json({
-      ...data,
-      usedInstanceName: instanceName,
-      exists: false,
-    });
+if (!resp.ok) {
+  console.error("❌ Erro ao criar instância:", data);
+  return res.status(resp.status).json({
+    error: data?.error || "Falha ao criar instância",
+    details: data,
+  });
+}
 
+console.log("✅ Instância criada com sucesso:", instanceName);
+
+// ✅ 3. Configura webhook fixo (reforço pós-criação)
+try {
+  await setWebhookForInstance(instanceName);
+  await setInstanceSettings(instanceName);
+  console.log("🔗 Webhook fixo configurado após criação");
+} catch (err) {
+  console.warn("⚠️ Falha ao configurar webhook após criação:", err.message);
+}
+
+return res.status(resp.status).json({
+  ...data,
+  usedInstanceName: instanceName,
+  exists: false,
+});
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
