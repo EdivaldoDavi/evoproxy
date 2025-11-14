@@ -6,7 +6,9 @@ import { resolveTenant } from "./auth.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
+app.listen(PORT, () => {
+  console.log(`🚀 evo-proxy rodando na porta ${PORT}`);
+});
 // Configurar CORS
 const origins = (process.env.CORS_ORIGINS || "")
   .split(",")
