@@ -15,10 +15,12 @@ const origins = (process.env.CORS_ORIGINS || "")
 
 app.use(cors({
   origin: "*",
-  methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "apikey", "X-Api-Key", "ngrok-skip-browser-warning"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "apikey", "X-Api-Key", "ngrok-skip-browser-warning"],
+  exposedHeaders: ["Content-Type"],
 }));
 
+app.options("*", cors()); 
 app.use(express.json());
 
 // Middleware de identificação do tenant
