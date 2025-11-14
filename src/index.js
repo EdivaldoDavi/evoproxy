@@ -6,9 +6,7 @@ import { resolveTenant } from "./auth.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 evo-proxy rodando na porta ${PORT}`);
-});
+
 // Configurar CORS
 const origins = (process.env.CORS_ORIGINS || "")
   .split(",")
@@ -18,8 +16,7 @@ const origins = (process.env.CORS_ORIGINS || "")
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "apikey",  "X-Api-Key",  "ngrok-skip-browser-warning"  ] // ✅ LIBERA O HEADER DO NGROK
-  
+  allowedHeaders: ["Content-Type", "apikey", "X-Api-Key", "ngrok-skip-browser-warning"]
 }));
 
 app.use(express.json());
@@ -35,6 +32,7 @@ app.get("/api/health", (_req, res) => {
 // Rotas EvolutionAPI
 app.use("/api/evo", evoRoutes);
 
+// --- AQUI: APENAS UM LISTEN ---
 app.listen(PORT, () => {
-  console.log(`✅ evo-proxy rodando em http://localhost:${PORT}`);
+  console.log(`🚀 evo-proxy rodando na porta ${PORT}`);
 });
