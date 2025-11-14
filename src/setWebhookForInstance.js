@@ -4,7 +4,7 @@ const EVO_URL = process.env.EVO_URL;
 const EVO_TOKEN = process.env.EVO_TOKEN;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
  
-export async function setWebHookForInstance(instanceId) {
+export async function setWebhookForInstance(instanceId) {
   if (!instanceId) throw new Error("instanceId ausente");
 
   try {
