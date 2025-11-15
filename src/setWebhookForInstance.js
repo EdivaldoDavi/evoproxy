@@ -17,11 +17,8 @@ export async function setWebhookForInstance(instanceId) {
     webhook_by_events: false,
     webhook_base64: true,
     events: [
-      "APPLICATION_STARTUP",
       "MESSAGES_UPSERT",
-      "MESSAGES_UPDATE",
-      "CONNECTION_UPDATE",
-      "QRCODE_UPDATED"
+       "webhook_base64"
     ]
   }
 };
