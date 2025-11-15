@@ -10,19 +10,20 @@ export async function setWebhookForInstance(instanceId) {
   try {
     const url = `${EVO_URL.replace(/\/$/, "")}/webhook/set/${encodeURIComponent(instanceId)}`;
 
-  const body = {
-  enabled: true,
-  url: WEBHOOK_URL,
-    "byEvents": true,
-    "base64": true,
-  events: [
-    "APPLICATION_STARTUP",
-    "MESSAGES_UPSERT",
-    "MESSAGES_UPDATE",
-    "CONNECTION_UPDATE",
-    "QRCODE_UPDATED"
-  ]
+ const body = {
+  webhook: {
+    enabled: true,
+    url: WEBHOOK_URL,
+    byEvents: true,
+    base64: true,
+    events: [
+      "MESSAGES_UPSERT",
+      "QRCODE_UPDATED",
+      "CONNECTION_UPDATE"
+    ]
+  }
 };
+
 
 
 
