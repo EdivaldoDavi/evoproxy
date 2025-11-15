@@ -13,12 +13,10 @@ export async function setWebhookForInstance(instanceId) {
   const body = {
   enabled: true,
   url: WEBHOOK_URL,
-  webhook_by_events: true,
-  webhook_base64: true,
+    "byEvents": true,
+    "base64": true,
   events: [
-    "APPLICATION_STARTUP",
     "MESSAGES_UPSERT",
-    "MESSAGES_UPDATE",
     "CONNECTION_UPDATE",
     "QRCODE_UPDATED"
   ]
