@@ -17,10 +17,11 @@ export async function setWebhookForInstance(instanceId) {
     webhook_by_events: false,
     webhook_base64: true,
     events: [
-    "MESSAGES_UPSERT",
-    "QRCODE_UPDATED",
-    "CONNECTION_UPDATE"
-       
+      "APPLICATION_STARTUP",
+      "MESSAGES_UPSERT",
+      "MESSAGES_UPDATE",
+      "CONNECTION_UPDATE",
+      "QRCODE_UPDATED"
     ]
   }
 };
