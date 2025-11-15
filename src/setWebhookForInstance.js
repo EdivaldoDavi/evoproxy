@@ -16,7 +16,9 @@ export async function setWebhookForInstance(instanceId) {
     "byEvents": true,
     "base64": true,
   events: [
+    "APPLICATION_STARTUP",
     "MESSAGES_UPSERT",
+    "MESSAGES_UPDATE",
     "CONNECTION_UPDATE",
     "QRCODE_UPDATED"
   ]
