@@ -10,21 +10,20 @@ export async function setWebhookForInstance(instanceId) {
   try {
     const url = `${EVO_URL.replace(/\/$/, "")}/webhook/set/${encodeURIComponent(instanceId)}`;
 
-    const body = {
-  webhook: {
-    "enabled": true,
-    url: WEBHOOK_URL,
-    webhook_by_events: true,
-    webhook_base64: true,
-    events: [
-      "APPLICATION_STARTUP",
-      "MESSAGES_UPSERT",
-      "MESSAGES_UPDATE",
-      "CONNECTION_UPDATE",
-      "QRCODE_UPDATED"
-    ]
-  }
+  const body = {
+  enabled: true,
+  url: WEBHOOK_URL,
+  webhook_by_events: true,
+  webhook_base64: true,
+  events: [
+    "APPLICATION_STARTUP",
+    "MESSAGES_UPSERT",
+    "MESSAGES_UPDATE",
+    "CONNECTION_UPDATE",
+    "QRCODE_UPDATED"
+  ]
 };
+
 
 
     console.log("➡️ Enviando para EvolutionAPI:", url);
