@@ -38,6 +38,79 @@ function resolveTenantInstance(req) {
   return id.replace(/^tenant_/, "").trim();
 }
 
+/* ============================================================
+   👤 CRIAR NOVO USUÁRIO (ADMIN) — usado pelo ModalNewUser
+============================================================ */
+router.post("/users/create", async (req, res) => {
+  try {
+    const { email, fullName, phone, role, tenantId } = req.body;
+
+    if (!email || !fullName || !tenantId) {
+      return res.status(400).json({ error: "Dados incompletos" });
+    }
+
+    console.log("👤 Criando novo usuário:", email, "role:", role);
+
+    // 1️⃣ Criar usuário real no Supabase Auth
+    const { data: userData, error: userError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        password: "bellas123", // 🔥 senha provisória
+        user_metadata: {
+          full_name: fullName,
+        },
+      });
+
+    if (userError) {
+      console.error(userError);
+      return res.status(400).json({ error: userError.message });
+    }
+
+    const userId = userData.user.id;
+
+    // 2️⃣ Criar registro na tabela 'profiles'
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .insert([
+        {
+          user_id: userId,
+          tenant_id: tenantId,
+          full_name: fullName,
+          role,
+        },
+      ]);
+
+    if (profileError) {
+      console.error(profileError);
+      return res.status(400).json({ error: profileError.message });
+    }
+
+    // 3️⃣ Se for profissional → criar na tabela professionals
+    if (role === "professional") {
+      await supabaseAdmin.from("professionals").insert([
+        {
+          tenant_id: tenantId,
+          user_id: userId,
+          name: fullName,
+          phone: phone || null,
+        },
+      ]);
+    }
+
+    console.log("✅ Usuário criado com sucesso:", userId);
+
+    return res.json({
+      success: true,
+      user_id: userId,
+      email,
+    });
+
+  } catch (err) {
+    console.error("❌ ERRO AO CRIAR USUÁRIO:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 /* ============================================================
    WEBHOOK — recebe QR e STATUS
