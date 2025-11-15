@@ -14,7 +14,7 @@ export async function setWebhookForInstance(instanceId) {
   webhook: {
     "enabled": true,
     url: WEBHOOK_URL,
-    webhook_by_events: false,
+    webhook_by_events: true,
     webhook_base64: true,
     events: [
       "APPLICATION_STARTUP",
